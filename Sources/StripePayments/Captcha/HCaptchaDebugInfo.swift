@@ -8,7 +8,7 @@
 import CryptoKit
 import Foundation
 import ObjectiveC.runtime
-import UIKit
+//import UIKit
 
 extension String {
     func jsSanitize() -> String {
@@ -87,7 +87,7 @@ class HCaptchaDebugInfo {
         let depsHash = getFinalHash(&depsCtx)
         let sysHash = getFinalHash(&sysCtx)
         let appHash = getFinalHash(&appCtx)
-        let iver = UIDevice.current.systemVersion.jsSanitize()
+        let iver = "dev" //UIDevice.current.systemVersion.jsSanitize()
 
         return [
             "sys_\(String(describing: sysHash))",

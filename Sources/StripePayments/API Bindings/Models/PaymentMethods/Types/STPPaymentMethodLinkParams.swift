@@ -6,7 +6,8 @@
 //  Copyright © 2021 Stripe, Inc. All rights reserved.
 //
 
-import UIKit
+//import UIKit
+import Foundation
 
 /// An object representing parameters used to create an Link Payment Method
 public class STPPaymentMethodLinkParams: NSObject, STPFormEncodable {

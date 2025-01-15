@@ -827,40 +827,6 @@ extension STPSourceVerificationStatus: CustomStringConvertible {
 }
 
 /// :nodoc:
-extension STPThreeDSButtonTitleStyle: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .`default`:
-            return "`default`"
-        case .lowercase:
-            return "lowercase"
-        case .sentenceCapitalized:
-            return "sentenceCapitalized"
-        case .uppercase:
-            return "uppercase"
-        }
-    }
-}
-
-/// :nodoc:
-extension STPThreeDSCustomizationButtonType: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .`continue`:
-            return "`continue`"
-        case .cancel:
-            return "cancel"
-        case .next:
-            return "next"
-        case .resend:
-            return "resend"
-        case .submit:
-            return "submit"
-        }
-    }
-}
-
-/// :nodoc:
 extension STPTokenType: CustomStringConvertible {
     public var description: String {
         switch self {

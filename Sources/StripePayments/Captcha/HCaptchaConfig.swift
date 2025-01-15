@@ -7,8 +7,9 @@
 //
 
 import JavaScriptCore
-import UIKit
+//import UIKit
 import WebKit
+import Foundation
 
 /** Widget display mode
  */

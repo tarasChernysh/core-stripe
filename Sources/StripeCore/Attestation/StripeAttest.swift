@@ -6,7 +6,10 @@
 import CryptoKit
 import DeviceCheck
 import Foundation
+
+#if canImport(UIKit)
 import UIKit
+#endif
 
 @_spi(STP) public actor StripeAttest {
     /// Initialize a new StripeAttest object with the specified STPAPIClient.
@@ -343,7 +346,7 @@ import UIKit
     }
 
     func getDeviceID() async throws -> String {
-        if let deviceID = await UIDevice.current.identifierForVendor?.uuidString {
+        if let deviceID = await DeviceInfo.identifierForVendor() {
             return deviceID
         }
         throw AttestationError.noDeviceID

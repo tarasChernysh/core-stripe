@@ -9,6 +9,9 @@
 import Foundation
 import SafariServices
 @_spi(STP) import StripeCore
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// Error codes specific to `STPRedirectContext`
 @objc public enum STPRedirectContextError: Int {
@@ -74,8 +77,21 @@ public typealias STPRedirectContextPaymentIntentCompletionBlock = (String, Error
 /// @note You must retain this instance for the duration of the redirect flow.
 /// This class dismisses any presented view controller upon deallocation.
 /// See https://stripe.com/docs/sources/best-practices
-public class STPRedirectContext: NSObject,
-    UIViewControllerTransitioningDelegate, STPSafariViewControllerDismissalDelegate
+///
+///
+///
+///
+
+
+#if canImport(UIKIt)
+import UIKit
+extension STPRedirectContext: UIViewControllerTransitioningDelegate, STPSafariViewControllerDismissalDelegate {
+    
+}
+#endif
+
+
+public class STPRedirectContext: NSObject
 {
 
     /// The domain for NSErrors specific to `STPRedirectContext`
@@ -102,7 +118,9 @@ public class STPRedirectContext: NSObject,
     var _handleRedirectCompletionWithErrorHook: ((Bool) -> Void)?
     /// Hook for testing when startSafariAppRedirectFlowCalled is called
     var _startSafariAppRedirectFlowCalled: Bool = false
-    var application: UIApplicationProtocol = UIApplication.shared
+#if os(iOS)
+    var application = UIApplication.shared
+    #endif
 
     /// Initializer for context from an `STPSource`.
     /// @note You must ensure that the returnURL set up in the created source
@@ -200,6 +218,7 @@ public class STPRedirectContext: NSObject,
     /// `STPRedirectContextStateNotStarted` state.
     /// - Parameter presentingViewController: The view controller to present the Safari
     /// view controller from.
+#if canImport(UIKIt)
     @objc(startRedirectFlowFromViewController:) public func startRedirectFlow(
         from presentingViewController: UIViewController
     ) {
@@ -247,6 +266,8 @@ public class STPRedirectContext: NSObject,
             })
         }
     }
+    
+    #endif
 
     /// Starts a redirect flow by presenting an SFSafariViewController in your app
     /// from the passed in view controller.
@@ -261,6 +282,8 @@ public class STPRedirectContext: NSObject,
     /// `STPRedirectContextStateNotStarted` state.
     /// - Parameter presentingViewController: The view controller to present the Safari
     /// view controller from.
+    ///
+#if canImport(UIKIt)
     @objc(startSafariViewControllerRedirectFlowFromViewController:)
     public dynamic func startSafariViewControllerRedirectFlow(
         from presentingViewController: UIViewController
@@ -285,6 +308,7 @@ public class STPRedirectContext: NSObject,
             )
         }
     }
+    #endif
 
     /// Starts a redirect flow by calling `openURL` to bounce the user out to
     /// the Safari app.
@@ -301,7 +325,11 @@ public class STPRedirectContext: NSObject,
         if state == .notStarted {
             state = .inProgress
             subscribeToURLAndAppActiveNotifications()
-            application._open(redirectURL, options: [:], completionHandler: nil)
+            #if os(iOS)
+//            application._open(redirectURL, options: [:], completionHandler: nil)
+            #else
+//            openURL(redirectURL)
+#endif
         }
     }
 
@@ -315,7 +343,9 @@ public class STPRedirectContext: NSObject,
         }
     }
 
+    #if canImport(UIKIt)
     private var safariVC: SFSafariViewController?
+    #endif
     /// If we're on iOS 11+ and in the SafariVC flow, this tracks the latest URL loaded/redirected to during the initial load
     private var lastKnownSafariVCURL: URL?
     private var source: STPSource?
@@ -349,6 +379,7 @@ public class STPRedirectContext: NSObject,
 
     // MARK: - UIViewControllerTransitioningDelegate
     /// :nodoc:
+    #if canImport(UIKIt)
     @objc
     public func presentationController(
         forPresented presented: UIViewController,
@@ -362,27 +393,30 @@ public class STPRedirectContext: NSObject,
         controller.dismissalDelegate = self
         return controller
     }
+    #endif
 
     // MARK: - Private methods -
-    func performAppRedirectIfPossible(withCompletion onCompletion: @escaping STPBoolCompletionBlock)
-    {
-
-        let nativeURL = nativeRedirectURL
-        if nativeURL == nil {
-            onCompletion(false)
-            return
-        }
-
-        if let nativeURL = nativeURL {
-            application._open(
-                nativeURL,
-                options: [:],
-                completionHandler: { success in
-                    onCompletion(success)
-                }
-            )
-        }
-    }
+//    func performAppRedirectIfPossible(withCompletion onCompletion: @escaping STPBoolCompletionBlock)
+//    {
+//
+//        let nativeURL = nativeRedirectURL
+//        if nativeURL == nil {
+//            onCompletion(false)
+//            return
+//        }
+//
+//        if let nativeURL = nativeURL {
+//#if canImport(UIKIt)
+//            application._open(
+//                nativeURL,
+//                options: [:],
+//                completionHandler: { success in
+//                    onCompletion(success)
+//                }
+//            )
+//#endif
+//        }
+//    }
 
     @objc func handleDidBecomeActiveNotification() {
         // Always `dispatch_async` the `handleDidBecomeActiveNotification` function
@@ -420,14 +454,14 @@ public class STPRedirectContext: NSObject,
         state = .completed
 
         unsubscribeFromNotifications()
-
+#if canImport(UIKIt)
         if isSafariVCPresented() {
             // SafariVC dismissal delegate will manage calling completion handler
             completionError = error
         } else {
             completion(error)
         }
-
+#endif
         if shouldDismissViewController {
             dismissPresentedViewController()
         }
@@ -449,6 +483,7 @@ public class STPRedirectContext: NSObject,
 
     func subscribeToURLAndAppActiveNotifications() {
         subscribeToURLNotifications()
+#if canImport(UIKIt)
         if !subscribedToAppActiveNotifications {
             subscribedToAppActiveNotifications = true
             NotificationCenter.default.addObserver(
@@ -458,6 +493,7 @@ public class STPRedirectContext: NSObject,
                 object: nil
             )
         }
+        #endif
     }
 
     func unsubscribeFromNotificationsAndDismissPresentedViewControllers() {
@@ -466,11 +502,13 @@ public class STPRedirectContext: NSObject,
     }
 
     @objc dynamic func unsubscribeFromNotifications() {
+#if canImport(UIKIt)
         NotificationCenter.default.removeObserver(
             self,
             name: UIApplication.didBecomeActiveNotification,
             object: nil
         )
+        #endif
         STPURLCallbackHandler.shared().unregisterListener(self)
         subscribedToURLNotifications = false
         subscribedToAppActiveNotifications = false
@@ -478,6 +516,7 @@ public class STPRedirectContext: NSObject,
     }
 
     @objc dynamic func dismissPresentedViewController() {
+#if canImport(UIKIt)
         if isSafariVCPresented() {
             safariVC?.presentingViewController?.dismiss(
                 animated: true
@@ -485,9 +524,11 @@ public class STPRedirectContext: NSObject,
             safariVC = nil
         }
         _dismissPresentedViewControllerCalled = true
+        #endif
     }
 
     // MARK: - STPSafariViewControllerDismissalDelegate -
+#if canImport(UIKIt)
     func safariViewControllerDidCompleteDismissal(_ controller: SFSafariViewController) {
         completion(completionError)
         completionError = nil
@@ -496,6 +537,7 @@ public class STPRedirectContext: NSObject,
     func isSafariVCPresented() -> Bool {
         return safariVC != nil
     }
+    #endif
 
     class func nativeRedirectURL(for source: STPSource) -> URL? {
         var nativeURLString: String?
@@ -529,6 +571,7 @@ public class STPRedirectContext: NSObject,
     }
 }
 
+#if canImport(UIKIt)
 @objc protocol STPSafariViewControllerDismissalDelegate: NSObjectProtocol {
     func safariViewControllerDidCompleteDismissal(_ controller: SFSafariViewController)
 }
@@ -560,7 +603,9 @@ extension UIApplication: UIApplicationProtocol {
         open(url, options: options, completionHandler: completion)
     }
 }
+#endif
 
+#if canImport(UIKit)
 #if !canImport(CompositorServices)
 extension STPRedirectContext: SFSafariViewControllerDelegate {
     // MARK: - SFSafariViewControllerDelegate -
@@ -623,4 +668,5 @@ extension STPRedirectContext: SFSafariViewControllerDelegate {
         })
     }
 }
+#endif
 #endif

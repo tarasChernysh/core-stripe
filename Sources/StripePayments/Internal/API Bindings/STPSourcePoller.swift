@@ -8,7 +8,9 @@
 
 import Foundation
 @_spi(STP) import StripeCore
+#if canImport(UIKit)
 import UIKit
+#endif
 
 class STPSourcePoller: NSObject {
     required init(
@@ -31,31 +33,31 @@ class STPSourcePoller: NSObject {
         pollingStopped = false
         super.init()
         poll(after: 0, lastError: nil)
-        let notificationCenter = NotificationCenter.default
-        notificationCenter.addObserver(
-            self,
-            selector: #selector(restartPolling),
-            name: UIApplication.didBecomeActiveNotification,
-            object: nil
-        )
-        notificationCenter.addObserver(
-            self,
-            selector: #selector(restartPolling),
-            name: UIApplication.willEnterForegroundNotification,
-            object: nil
-        )
-        notificationCenter.addObserver(
-            self,
-            selector: #selector(pausePolling),
-            name: UIApplication.willResignActiveNotification,
-            object: nil
-        )
-        notificationCenter.addObserver(
-            self,
-            selector: #selector(pausePolling),
-            name: UIApplication.didEnterBackgroundNotification,
-            object: nil
-        )
+//        let notificationCenter = NotificationCenter.default
+//        notificationCenter.addObserver(
+//            self,
+//            selector: #selector(restartPolling),
+//            name: UIApplication.didBecomeActiveNotification,
+//            object: nil
+//        )
+//        notificationCenter.addObserver(
+//            self,
+//            selector: #selector(restartPolling),
+//            name: UIApplication.willEnterForegroundNotification,
+//            object: nil
+//        )
+//        notificationCenter.addObserver(
+//            self,
+//            selector: #selector(pausePolling),
+//            name: UIApplication.willResignActiveNotification,
+//            object: nil
+//        )
+//        notificationCenter.addObserver(
+//            self,
+//            selector: #selector(pausePolling),
+//            name: UIApplication.didEnterBackgroundNotification,
+//            object: nil
+//        )
     }
 
     // Stops polling and cancels the request in progress.
@@ -111,22 +113,22 @@ class STPSourcePoller: NSObject {
 
     @objc func _poll() {
         timer = nil
-        let application = UIApplication.shared
-        var bgTaskID: UIBackgroundTaskIdentifier = .invalid
-        bgTaskID = application.beginBackgroundTask(expirationHandler: {
-            application.endBackgroundTask(bgTaskID)
-            bgTaskID = .invalid
-        })
-        apiClient?.retrieveSource(
-            withId: sourceID,
-            clientSecret: clientSecret,
-            responseCompletion: { source, response, error in
-                self._continue(with: source, response: response, error: error as NSError?)
-                self.requestCount += 1
-                application.endBackgroundTask(bgTaskID)
-                bgTaskID = .invalid
-            }
-        )
+//        let application = UIApplication.shared
+//        var bgTaskID: UIBackgroundTaskIdentifier = .invalid
+//        bgTaskID = application.beginBackgroundTask(expirationHandler: {
+//            application.endBackgroundTask(bgTaskID)
+//            bgTaskID = .invalid
+//        })
+//        apiClient?.retrieveSource(
+//            withId: sourceID,
+//            clientSecret: clientSecret,
+//            responseCompletion: { source, response, error in
+//                self._continue(with: source, response: response, error: error as NSError?)
+//                self.requestCount += 1
+//                application.endBackgroundTask(bgTaskID)
+//                bgTaskID = .invalid
+//            }
+//        )
     }
 
     func _continue(

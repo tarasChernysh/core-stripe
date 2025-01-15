@@ -6,7 +6,8 @@
 //  Copyright © 2022 Stripe, Inc. All rights reserved.
 //
 
-import UIKit
+//import UIKit
+import Foundation
 
 @objc public enum STPMicrodepositType: Int {
 

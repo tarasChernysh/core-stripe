@@ -7,7 +7,10 @@
 //
 
 import Foundation
+
+#if canImport(UIKit)
 import UIKit
+#endif
 
 extension StripeFile.Purpose {
     /// See max purpose sizes https://stripe.com/docs/file-upload.
@@ -24,6 +27,7 @@ extension StripeFile.Purpose {
     }
 }
 
+#if canImport(UIKit)
 /// STPAPIClient extensions to upload files.
 extension STPAPIClient {
     @_spi(STP) public typealias FileAndUploadMetrics = (
@@ -230,5 +234,7 @@ extension STPAPIClient {
     }
 
 }
+
+#endif
 
 private let FileUploadURL = "https://uploads.stripe.com/v1/files"

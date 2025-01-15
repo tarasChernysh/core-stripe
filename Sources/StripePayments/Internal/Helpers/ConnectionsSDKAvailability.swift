@@ -9,7 +9,6 @@
 import Foundation
 @_spi(STP) import StripeCore
 import SwiftUI
-import UIKit
 
 @_spi(STP) public struct FinancialConnectionsSDKAvailability {
     static let FinancialConnectionsSDKClass: FinancialConnectionsSDKInterface.Type? =
@@ -46,43 +45,44 @@ import UIKit
     }
 
     static func financialConnections() -> FinancialConnectionsSDKInterface? {
-        let financialConnectionsStubbedResult = ProcessInfo.processInfo.environment["FinancialConnectionsStubbedResult"] == "true"
-        if isUnitTest || (isUITest && financialConnectionsStubbedResult) {
-            return StubbedConnectionsSDKInterface()
-        }
-
-        guard let klass = FinancialConnectionsSDKClass else {
-            return nil
-        }
-
-        return klass.init()
+        return nil
+//        let financialConnectionsStubbedResult = ProcessInfo.processInfo.environment["FinancialConnectionsStubbedResult"] == "true"
+//        if isUnitTest || (isUITest && financialConnectionsStubbedResult) {
+//            return StubbedConnectionsSDKInterface()
+//        }
+//
+//        guard let klass = FinancialConnectionsSDKClass else {
+//            return nil
+//        }
+//
+//        return klass.init()
     }
 }
 
-final class StubbedConnectionsSDKInterface: FinancialConnectionsSDKInterface {
-    func presentFinancialConnectionsSheet(
-        apiClient: STPAPIClient,
-        clientSecret: String,
-        returnURL: String?,
-        elementsSessionContext: ElementsSessionContext?,
-        onEvent: ((FinancialConnectionsEvent) -> Void)?,
-        from presentingViewController: UIViewController,
-        completion: @escaping (FinancialConnectionsSDKResult) -> Void
-    ) {
-        DispatchQueue.main.async {
-            let stubbedBank = FinancialConnectionsLinkedBank(
-                sessionId: "las_123",
-                accountId: "fca_123",
-                displayName: "Test Bank",
-                bankName: "Test Bank",
-                last4: "1234",
-                instantlyVerified: true
-            )
-            completion(
-                FinancialConnectionsSDKResult.completed(
-                    .financialConnections(stubbedBank)
-                )
-            )
-        }
-    }
-}
+//final class StubbedConnectionsSDKInterface: FinancialConnectionsSDKInterface {
+//    func presentFinancialConnectionsSheet(
+//        apiClient: STPAPIClient,
+//        clientSecret: String,
+//        returnURL: String?,
+//        elementsSessionContext: ElementsSessionContext?,
+//        onEvent: ((FinancialConnectionsEvent) -> Void)?,
+//        from presentingViewController: UIViewController,
+//        completion: @escaping (FinancialConnectionsSDKResult) -> Void
+//    ) {
+//        DispatchQueue.main.async {
+//            let stubbedBank = FinancialConnectionsLinkedBank(
+//                sessionId: "las_123",
+//                accountId: "fca_123",
+//                displayName: "Test Bank",
+//                bankName: "Test Bank",
+//                last4: "1234",
+//                instantlyVerified: true
+//            )
+//            completion(
+//                FinancialConnectionsSDKResult.completed(
+//                    .financialConnections(stubbedBank)
+//                )
+//            )
+//        }
+//    }
+//}

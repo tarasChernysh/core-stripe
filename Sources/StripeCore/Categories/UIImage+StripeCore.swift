@@ -6,10 +6,13 @@
 //  Copyright © 2017 Stripe, Inc. All rights reserved.
 //
 import AVFoundation
+#if canImport(UIKit)
 import UIKit
+#endif
 
 @_spi(STP) public typealias ImageDataAndSize = (imageData: Data, imageSize: CGSize)
 
+#if canImport(UIKit)
 extension UIImage {
     @_spi(STP) public static let defaultCompressionQuality: CGFloat = 0.5
 
@@ -160,3 +163,4 @@ extension Array where Element: UIImage {
         return nil
     }
 }
+#endif
