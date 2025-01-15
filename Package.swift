@@ -12,6 +12,9 @@ let package = Package(
         .library(
             name: "StripeCore",
             targets: ["StripeCore"]),
+        .library(
+            name: "StripePayments",
+            targets: ["StripePayments"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -23,5 +26,8 @@ let package = Package(
             name: "StripeCoreTests",
             dependencies: ["StripeCore"]
         ),
+        .target(
+            name: "StripePayments",
+            resources: [.process("Resources")]),
     ]
 )
