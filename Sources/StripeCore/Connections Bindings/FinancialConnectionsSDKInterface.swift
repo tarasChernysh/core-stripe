@@ -6,10 +6,14 @@
 //  Copyright © 2022 Stripe, Inc. All rights reserved.
 //
 
+import Foundation
+#if canImport(UIKit)
 import UIKit
+#endif
 
 @_spi(STP) public protocol FinancialConnectionsSDKInterface {
     init()
+    #if canImport(UIKit)
     func presentFinancialConnectionsSheet(
         apiClient: STPAPIClient,
         clientSecret: String,
@@ -19,4 +23,5 @@ import UIKit
         from presentingViewController: UIViewController,
         completion: @escaping (FinancialConnectionsSDKResult) -> Void
     )
+    #endif
 }

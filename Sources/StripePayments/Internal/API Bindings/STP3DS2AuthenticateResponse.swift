@@ -24,7 +24,7 @@ enum STP3DS2AuthenticateResponseState: Int {
 class STP3DS2AuthenticateResponse: NSObject, STPAPIResponseDecodable {
     private(set) var allResponseFields: [AnyHashable: Any] = [:]
     /// The Authentication Response received from the Access Control Server
-    private(set) var authenticationResponse: STDSAuthenticationResponse?
+//    private(set) var authenticationResponse: STDSAuthenticationResponse?
     /// When the 3DS2 Authenticate Response was created.
     private(set) var created: Date?
     /// Whether or not this Authenticate Response was created in livemode.
@@ -50,14 +50,14 @@ class STP3DS2AuthenticateResponse: NSObject, STPAPIResponseDecodable {
 
         let authenticationResponseJSON = dict.stp_dictionary(forKey: "ares")
 
-        var authenticationResponse: STDSAuthenticationResponse?
-        if let authenticationResponseJSON = authenticationResponseJSON {
-            authenticationResponse = STDSAuthenticationResponseFromJSON(authenticationResponseJSON)
-        }
-        if authenticationResponse == nil && fallbackURL == nil {
-            // we need at least one of ares or fallback_redirect_url
-            return nil
-        }
+//        var authenticationResponse: STDSAuthenticationResponse?
+//        if let authenticationResponseJSON = authenticationResponseJSON {
+//            authenticationResponse = STDSAuthenticationResponseFromJSON(authenticationResponseJSON)
+//        }
+//        if authenticationResponse == nil && fallbackURL == nil {
+//            // we need at least one of ares or fallback_redirect_url
+//            return nil
+//        }
 
         let stateString = dict.stp_string(forKey: "state")
         var state: STP3DS2AuthenticateResponseState = .unknown
@@ -68,7 +68,7 @@ class STP3DS2AuthenticateResponse: NSObject, STPAPIResponseDecodable {
         }
 
         let authResponse = self.init()
-        authResponse.authenticationResponse = authenticationResponse
+//        authResponse.authenticationResponse = authenticationResponse
         authResponse.state = state
         authResponse.created = dict.stp_date(forKey: "created")
         authResponse.livemode = dict.stp_bool(forKey: "livemode", or: true)

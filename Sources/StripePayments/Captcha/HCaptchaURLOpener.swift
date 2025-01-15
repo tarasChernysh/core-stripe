@@ -6,7 +6,9 @@
 //
 
 import Foundation
+#if canImport(UIKit)
 import UIKit
+#endif
 
 /**
  * The protocol for a contractor which can handle/open URLs in an external viewer/browser
@@ -30,10 +32,15 @@ internal protocol HCaptchaURLOpener {
  */
 internal class HCapchaAppURLOpener: HCaptchaURLOpener {
     func canOpenURL(_ url: URL) -> Bool {
-        return UIApplication.shared.canOpenURL(url)
+//        #if os(iOS)
+//        return UIApplication.shared.canOpenURL(url)
+//        #endif
+        true
     }
 
     func openURL(_ url: URL) {
+#if os(iOS)
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
+#endif
     }
 }

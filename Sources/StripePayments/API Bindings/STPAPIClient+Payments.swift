@@ -9,7 +9,7 @@
 import Foundation
 import PassKit
 @_spi(STP) import StripeCore
-import UIKit
+//import UIKit
 
 #if canImport(Stripe3DS2)
     import Stripe3DS2
@@ -143,6 +143,7 @@ extension STPAPIClient {
     ///   - completion: The callback to run with the returned Stripe file
     /// (and any errors that may have occurred).
     /// - seealso: https://stripe.com/docs/file-upload
+    #if canImport(UIKit)
     @objc(uploadImage:purpose:completion:)
     public func uploadImage(
         _ image: UIImage,
@@ -158,6 +159,7 @@ extension STPAPIClient {
             }
         }
     }
+    #endif
 }
 
 extension StripeFile.Purpose {
@@ -896,45 +898,45 @@ extension STPAPIClient {
 
 // MARK: - ThreeDS2
 extension STPAPIClient {
-    /// Kicks off 3DS2 authentication.
-    func authenticate3DS2(
-        _ authRequestParams: STDSAuthenticationRequestParameters,
-        sourceIdentifier sourceID: String,
-        returnURL returnURLString: String?,
-        maxTimeout: Int,
-        publishableKeyOverride: String?,
-        completion: @escaping STP3DS2AuthenticateCompletionBlock
-    ) {
-        let endpoint = "\(APIEndpoint3DS2)/authenticate"
-
-        var appParams = STDSJSONEncoder.dictionary(forObject: authRequestParams)
-        appParams["deviceRenderOptions"] = [
-            "sdkInterface": "03",
-            "sdkUiType": ["01", "02", "03", "04", "05"],
-        ] as [String: Any]
-        appParams["sdkMaxTimeout"] = String(format: "%02ld", maxTimeout)
-        let appData = try? JSONSerialization.data(
-            withJSONObject: appParams,
-            options: .prettyPrinted
-        )
-
-        var params = [
-            "app": String(decoding: appData ?? Data(), as: UTF8.self),
-            "source": sourceID,
-        ]
-        if let returnURLString = returnURLString {
-            params["fallback_return_url"] = returnURLString
-        }
-
-        APIRequest<STP3DS2AuthenticateResponse>.post(
-            with: self,
-            endpoint: endpoint,
-            additionalHeaders: authorizationHeader(using: publishableKeyOverride),
-            parameters: params
-        ) { authenticateResponse, _, error in
-            completion(authenticateResponse, error)
-        }
-    }
+//    /// Kicks off 3DS2 authentication.
+//    func authenticate3DS2(
+//        _ authRequestParams: STDSAuthenticationRequestParameters,
+//        sourceIdentifier sourceID: String,
+//        returnURL returnURLString: String?,
+//        maxTimeout: Int,
+//        publishableKeyOverride: String?,
+//        completion: @escaping STP3DS2AuthenticateCompletionBlock
+//    ) {
+//        let endpoint = "\(APIEndpoint3DS2)/authenticate"
+//
+//        var appParams = STDSJSONEncoder.dictionary(forObject: authRequestParams)
+//        appParams["deviceRenderOptions"] = [
+//            "sdkInterface": "03",
+//            "sdkUiType": ["01", "02", "03", "04", "05"],
+//        ] as [String: Any]
+//        appParams["sdkMaxTimeout"] = String(format: "%02ld", maxTimeout)
+//        let appData = try? JSONSerialization.data(
+//            withJSONObject: appParams,
+//            options: .prettyPrinted
+//        )
+//
+//        var params = [
+//            "app": String(decoding: appData ?? Data(), as: UTF8.self),
+//            "source": sourceID,
+//        ]
+//        if let returnURLString = returnURLString {
+//            params["fallback_return_url"] = returnURLString
+//        }
+//
+//        APIRequest<STP3DS2AuthenticateResponse>.post(
+//            with: self,
+//            endpoint: endpoint,
+//            additionalHeaders: authorizationHeader(using: publishableKeyOverride),
+//            parameters: params
+//        ) { authenticateResponse, _, error in
+//            completion(authenticateResponse, error)
+//        }
+//    }
 
     /// Endpoint to call to indicate that the challenge flow for a 3DS2 authentication has finished.
     func complete3DS2Authentication(

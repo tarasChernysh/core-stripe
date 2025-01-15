@@ -7,8 +7,9 @@
 //
 
 import JavaScriptCore
-import UIKit
+//import UIKit
 import WebKit
+import Foundation
 
 /**
   hCaptcha SDK facade (entry point)
@@ -144,15 +145,15 @@ class HCaptcha: NSObject {
 
      Starts the challenge validation
     */
-    @objc
-    func validate(on view: UIView, resetOnError: Bool = true, completion: @escaping (HCaptchaResult) -> Void) {
-        Log.debug(".validate on: \(view) resetOnError: \(resetOnError)")
-
-        manager.shouldResetOnError = resetOnError
-        manager.completion = completion
-
-        manager.validate(on: view)
-    }
+//    @objc
+//    func validate(on view: UIView, resetOnError: Bool = true, completion: @escaping (HCaptchaResult) -> Void) {
+//        Log.debug(".validate on: \(view) resetOnError: \(resetOnError)")
+//
+//        manager.shouldResetOnError = resetOnError
+//        manager.completion = completion
+//
+//        manager.validate(on: view)
+//    }
 
     /// Stops the execution of the webview
     @objc

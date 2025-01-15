@@ -99,8 +99,8 @@ internal class HCaptchaWebViewManager: NSObject {
             frame: CGRect(origin: CGPoint.zero, size: webViewInitSize),
             configuration: self.buildConfiguration()
         )
-        webview.accessibilityIdentifier = "webview"
-        webview.accessibilityTraits = UIAccessibilityTraits.link
+//        webview.accessibilityIdentifier = "webview"
+//        webview.accessibilityTraits = UIAccessibilityTraits.link
         webview.isHidden = true
         if debug {
             if #available(iOS 16.4, *) {
@@ -170,23 +170,23 @@ internal class HCaptchaWebViewManager: NSObject {
 
      Starts the challenge validation
      */
-    func validate(on view: UIView) {
-        Log.debug("WebViewManager.validate on: \(view)")
-        resultHandled = false
-
-#if DEBUG
-        guard !shouldSkipForTests else {
-            completion?(HCaptchaResult(self, token: ""))
-            return
-        }
-#endif
-        view.addSubview(webView)
-        if self.didFinishLoading && (webView.bounds.size == CGSize.zero || webView.bounds.size == webViewInitSize) {
-            self.doConfigureWebView()
-        }
-
-        executeJS(command: .execute)
-    }
+//    func validate(on view: UIView) {
+//        Log.debug("WebViewManager.validate on: \(view)")
+//        resultHandled = false
+//
+//#if DEBUG
+//        guard !shouldSkipForTests else {
+//            completion?(HCaptchaResult(self, token: ""))
+//            return
+//        }
+//#endif
+//        view.addSubview(webView)
+//        if self.didFinishLoading && (webView.bounds.size == CGSize.zero || webView.bounds.size == webViewInitSize) {
+//            self.doConfigureWebView()
+//        }
+//
+//        executeJS(command: .execute)
+//    }
 
     /// Stops the execution of the webview
     func stop() {
@@ -268,7 +268,7 @@ fileprivate extension HCaptchaWebViewManager {
         if error == .sessionTimeout {
             if shouldResetOnError, let view = webView.superview {
                 reset()
-                validate(on: view)
+//                validate(on: view)
             } else {
                 completion?(HCaptchaResult(self, error: error))
             }
@@ -315,21 +315,21 @@ fileprivate extension HCaptchaWebViewManager {
             .sorted { firstWindow, _ in firstWindow.isKeyWindow }
         let window = windows.first
         #else
-        let window = UIApplication.shared.windows.first { $0.isKeyWindow }
+//        let window = UIApplication.shared.windows.first { $0.isKeyWindow }
         #endif
-        if let window {
-            setupWebview(on: window, html: html, url: url)
-        } else {
-            observer = NotificationCenter.default.addObserver(
-                forName: UIWindow.didBecomeVisibleNotification,
-                object: nil,
-                queue: nil
-            ) { [weak self] notification in
-                guard let window = notification.object as? UIWindow else { return }
-                guard let slf = self else { return }
-                slf.setupWebview(on: window, html: html, url: url)
-            }
-        }
+//        if let window {
+//            setupWebview(on: window, html: html, url: url)
+//        } else {
+//            observer = NotificationCenter.default.addObserver(
+//                forName: UIWindow.didBecomeVisibleNotification,
+//                object: nil,
+//                queue: nil
+//            ) { [weak self] notification in
+//                guard let window = notification.object as? UIWindow else { return }
+//                guard let slf = self else { return }
+//                slf.setupWebview(on: window, html: html, url: url)
+//            }
+//        }
     }
 
     /**
@@ -340,20 +340,20 @@ fileprivate extension HCaptchaWebViewManager {
 
      Adds the webview to a valid UIView and loads the initial HTML file
      */
-    func setupWebview(on window: UIWindow, html: String, url: URL) {
-        Log.debug("WebViewManager.setupWebview")
-        if webView.superview == nil {
-            window.addSubview(webView)
-        }
-        webView.loadHTMLString(html, baseURL: url)
-        if webView.navigationDelegate == nil {
-            webView.navigationDelegate = self
-        }
-
-        if let observer = observer {
-            NotificationCenter.default.removeObserver(observer)
-        }
-    }
+//    func setupWebview(on window: UIWindow, html: String, url: URL) {
+//        Log.debug("WebViewManager.setupWebview")
+//        if webView.superview == nil {
+//            window.addSubview(webView)
+//        }
+//        webView.loadHTMLString(html, baseURL: url)
+//        if webView.navigationDelegate == nil {
+//            webView.navigationDelegate = self
+//        }
+//
+//        if let observer = observer {
+//            NotificationCenter.default.removeObserver(observer)
+//        }
+//    }
 
     /**
      - parameters:

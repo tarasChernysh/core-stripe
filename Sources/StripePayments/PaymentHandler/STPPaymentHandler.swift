@@ -110,7 +110,7 @@ public class STPPaymentHandler: NSObject {
     /// YES from when a public method is first called until its associated completion handler is called.
     /// This property guards against simultaneous usage of this class; only one "next action" can be handled at a time.
     private static var inProgress = false
-    private var safariViewController: SFSafariViewController?
+//    private var safariViewController: SFSafariViewController?
     private var asWebAuthenticationSession: ASWebAuthenticationSession?
 
     /// Set this to true if you want a specific test to run the _canPresent code
@@ -127,22 +127,14 @@ public class STPPaymentHandler: NSObject {
     }
 
     @_spi(STP) public init(
-        apiClient: STPAPIClient = .shared,
-        threeDSCustomizationSettings: STPThreeDSCustomizationSettings =
-            STPThreeDSCustomizationSettings()
+        apiClient: STPAPIClient = .shared
     ) {
         self.apiClient = apiClient
-        self.threeDSCustomizationSettings = threeDSCustomizationSettings
         super.init()
     }
 
     /// By default `sharedHandler` initializes with STPAPIClient.shared.
     @objc public var apiClient: STPAPIClient
-
-    /// Customizable settings to use when performing 3DS2 authentication.
-    /// Note: Configure this before calling any methods.
-    /// Defaults to `STPThreeDSCustomizationSettings()`.
-    @objc public var threeDSCustomizationSettings: STPThreeDSCustomizationSettings
 
     internal var _simulateAppToAppRedirect: Bool = false
 
@@ -525,7 +517,6 @@ public class STPPaymentHandler: NSObject {
                 let action = STPPaymentHandlerSetupIntentActionParams(
                     apiClient: self.apiClient,
                     authenticationContext: authenticationContext,
-                    threeDSCustomizationSettings: self.threeDSCustomizationSettings,
                     setupIntent: setupIntent,
                     returnURL: setupIntentConfirmParams.returnURL
                 ) { status, resultSetupIntent, resultError in
@@ -771,7 +762,6 @@ public class STPPaymentHandler: NSObject {
         let action = STPPaymentHandlerPaymentIntentActionParams(
             apiClient: apiClient,
             authenticationContext: authenticationContext,
-            threeDSCustomizationSettings: threeDSCustomizationSettings,
             paymentIntent: paymentIntent,
             returnURL: returnURLString
         ) { status, resultPaymentIntent, error in
@@ -808,7 +798,6 @@ public class STPPaymentHandler: NSObject {
         let action = STPPaymentHandlerSetupIntentActionParams(
             apiClient: apiClient,
             authenticationContext: authenticationContext,
-            threeDSCustomizationSettings: threeDSCustomizationSettings,
             setupIntent: setupIntent,
             returnURL: returnURLString
         ) { status, resultSetupIntent, resultError in
@@ -1028,28 +1017,30 @@ public class STPPaymentHandler: NSObject {
             }
 
         case .alipayHandleRedirect:
-            if let alipayHandleRedirect = authenticationAction.alipayHandleRedirect {
-                _handleRedirect(
-                    to: alipayHandleRedirect.nativeURL,
-                    fallbackURL: alipayHandleRedirect.url,
-                    return: alipayHandleRedirect.returnURL,
-                    useWebAuthSession: false
-                )
-            } else {
-                failCurrentActionWithMissingNextActionDetails()
-            }
+//            if let alipayHandleRedirect = authenticationAction.alipayHandleRedirect {
+//                _handleRedirect(
+//                    to: alipayHandleRedirect.nativeURL,
+//                    fallbackURL: alipayHandleRedirect.url,
+//                    return: alipayHandleRedirect.returnURL,
+//                    useWebAuthSession: false
+//                )
+//            } else {
+//                failCurrentActionWithMissingNextActionDetails()
+//            }
+            break
 
         case .weChatPayRedirectToApp:
-            if let weChatPayRedirectToApp = authenticationAction.weChatPayRedirectToApp {
-                _handleRedirect(
-                    to: weChatPayRedirectToApp.nativeURL,
-                    fallbackURL: nil,
-                    return: nil,
-                    useWebAuthSession: false
-                )
-            } else {
-                failCurrentActionWithMissingNextActionDetails()
-            }
+//            if let weChatPayRedirectToApp = authenticationAction.weChatPayRedirectToApp {
+//                _handleRedirect(
+//                    to: weChatPayRedirectToApp.nativeURL,
+//                    fallbackURL: nil,
+//                    return: nil,
+//                    useWebAuthSession: false
+//                )
+//            } else {
+//                failCurrentActionWithMissingNextActionDetails()
+//            }
+            break
 
         case .OXXODisplayDetails:
             if let hostedVoucherURL = authenticationAction.oxxoDisplayDetails?.hostedVoucherURL {
@@ -1079,180 +1070,182 @@ public class STPPaymentHandler: NSObject {
                     currentAction.complete(with: STPPaymentHandlerActionStatus.failed, error: _error(for: .unexpectedErrorCode, loggingSafeErrorMessage: "Unexpected useStripeSDK type"))
 
                 case .threeDS2Fingerprint:
-                    guard let threeDSService = currentAction.threeDS2Service else {
-                        currentAction.complete(
-                            with: STPPaymentHandlerActionStatus.failed,
-                            error: _error(
-                                for: .stripe3DS2ErrorCode,
-                                loggingSafeErrorMessage: "Failed to initialize STDSThreeDS2Service."
-                            )
-                        )
-                        return
-                    }
-                    var transaction: STDSTransaction?
-                    var authRequestParams: STDSAuthenticationRequestParameters?
+//                    guard let threeDSService = currentAction.threeDS2Service else {
+//                        currentAction.complete(
+//                            with: STPPaymentHandlerActionStatus.failed,
+//                            error: _error(
+//                                for: .stripe3DS2ErrorCode,
+//                                loggingSafeErrorMessage: "Failed to initialize STDSThreeDS2Service."
+//                            )
+//                        )
+//                        return
+//                    }
+//                    var transaction: STDSTransaction?
+//                    var authRequestParams: STDSAuthenticationRequestParameters?
+//
+//                    STDSSwiftTryCatch.try(
+//                        {
+//                            transaction = threeDSService.createTransaction(
+//                                forDirectoryServer: useStripeSDK.directoryServerID ?? "",
+//                                serverKeyID: useStripeSDK.directoryServerKeyID,
+//                                certificateString: useStripeSDK.directoryServerCertificate ?? "",
+//                                rootCertificateStrings: useStripeSDK.rootCertificateStrings ?? [],
+//                                withProtocolVersion: "2.2.0"
+//                            )
+//                            authRequestParams = transaction?.createAuthenticationRequestParameters()
+//                        },
+//                        catch: { exception in
+//
+//                            self.analyticsClient
+//                                .log3DS2AuthenticationRequestParamsFailed(
+//                                    with: currentAction.apiClient._stored_configuration,
+//                                    intentID: currentAction.intentStripeID,
+//                                    error: self._error(
+//                                        for: .stripe3DS2ErrorCode,
+//                                        loggingSafeErrorMessage: exception.description
+//                                    )
+//                                )
+//
+//                            currentAction.complete(
+//                                with: STPPaymentHandlerActionStatus.failed,
+//                                error: self._error(
+//                                    for: .stripe3DS2ErrorCode,
+//                                    loggingSafeErrorMessage: exception.description
+//                                )
+//                            )
+//                        },
+//                        finallyBlock: {
+//                        }
+//                    )
+//
+//                    analyticsClient.log3DS2AuthenticateAttempt(
+//                        with: currentAction.apiClient._stored_configuration,
+//                        intentID: currentAction.intentStripeID
+//                    )
+//
+//                    guard let authParams = authRequestParams, let transaction else {
+//                        currentAction.complete(
+//                            with: STPPaymentHandlerActionStatus.failed,
+//                            error: self._error(
+//                                for: .stripe3DS2ErrorCode,
+//                                loggingSafeErrorMessage: transaction == nil ? "Missing transaction." : "Missing auth request params."
+//                            )
+//                        )
+//                        return
+//                    }
+//                    currentAction.threeDS2Transaction = transaction
+//                    currentAction.apiClient.authenticate3DS2(
+//                        authParams,
+//                        sourceIdentifier: useStripeSDK.threeDSSourceID ?? "",
+//                        returnURL: currentAction.returnURLString,
+//                        maxTimeout: currentAction.threeDSCustomizationSettings
+//                            .authenticationTimeout,
+//                        publishableKeyOverride: useStripeSDK.publishableKeyOverride
+//                    ) { (authenticateResponse, error) in
+//                        guard let authenticateResponse else {
+//                            let error = error ?? self._error(for: .stripe3DS2ErrorCode, loggingSafeErrorMessage: "Missing authenticate response")
+//                            currentAction.complete(with: .failed, error: error as NSError)
+//                            return
+//                        }
+//                        guard error == nil else {
+//                            currentAction.complete(with: .failed, error: error! as NSError)
+//                            return
+//                        }
+//                        if let aRes = authenticateResponse.authenticationResponse {
+//
+//                            if aRes.isChallengeRequired {
+//                                let challengeParameters = STDSChallengeParameters(
+//                                    authenticationResponse: aRes
+//                                )
+//
+//                                let doChallenge: STPVoidBlock = {
+//                                    var presentationError: NSError?
+//
+//                                    guard self._canPresent(
+//                                        with: currentAction.authenticationContext,
+//                                        error: &presentationError
+//                                    ) else {
+//                                        currentAction.complete(
+//                                            with: .failed,
+//                                            error: presentationError
+//                                        )
+//                                        return
+//                                    }
+//                                    STDSSwiftTryCatch.try({
+//                                        let presentingViewController = currentAction.authenticationContext.authenticationPresentingViewController()
+//                                        let timeout = TimeInterval(currentAction.threeDSCustomizationSettings.authenticationTimeout * 60)
+//                                        if let paymentSheet = presentingViewController as? PaymentSheetAuthenticationContext {
+//                                            transaction.doChallenge(
+//                                                with: challengeParameters,
+//                                                challengeStatusReceiver: self,
+//                                                timeout: timeout
+//                                            ) { threeDSChallengeViewController, completion in
+//                                                paymentSheet.present(
+//                                                    threeDSChallengeViewController,
+//                                                    completion: completion
+//                                                )
+//                                            }
+//                                        } else {
+//                                            transaction.doChallenge(
+//                                                with: presentingViewController,
+//                                                challengeParameters: challengeParameters,
+//                                                challengeStatusReceiver: self,
+//                                                timeout: timeout
+//                                            )
+//                                        }
+//                                    }, catch: { exception in
+//                                        self.currentAction?.complete(
+//                                            with: .failed,
+//                                            error: self._error(
+//                                                for: .stripe3DS2ErrorCode,
+//                                                loggingSafeErrorMessage: exception.description
+//                                            )
+//                                        )
+//                                    }, finallyBlock: {}
+//                                    )
+//                                }
+//
+//                                if currentAction.authenticationContext.responds(
+//                                    to: #selector(
+//                                        STPAuthenticationContext.prepare(forPresentation:))
+//                                ) {
+//                                    currentAction.authenticationContext.prepare?(
+//                                        forPresentation: doChallenge
+//                                    )
+//                                } else {
+//                                    doChallenge()
+//                                }
+//
+//                            } else {
+//                                // Challenge not required, finish the flow.
+//                                transaction.close()
+//                                currentAction.threeDS2Transaction = nil
+//                                self.analyticsClient.log3DS2FrictionlessFlow(
+//                                    with: currentAction.apiClient._stored_configuration,
+//                                    intentID: currentAction.intentStripeID
+//                                )
+//
+//                                self._retrieveAndCheckIntentForCurrentAction()
+//                            }
+//
+//                        } else if let fallbackURL = authenticateResponse.fallbackURL {
+//                            self._handleRedirect(
+//                                to: fallbackURL,
+//                                withReturn: URL(string: currentAction.returnURLString ?? ""), useWebAuthSession: false
+//                            )
+//                        } else {
+//                            currentAction.complete(
+//                                with: .failed,
+//                                error: self._error(
+//                                    for: .unexpectedErrorCode,
+//                                    loggingSafeErrorMessage: "3DS2 authenticate response missing both response and fallback URL."
+//                                )
+//                            )
+//                        }
+//                    }
 
-                    STDSSwiftTryCatch.try(
-                        {
-                            transaction = threeDSService.createTransaction(
-                                forDirectoryServer: useStripeSDK.directoryServerID ?? "",
-                                serverKeyID: useStripeSDK.directoryServerKeyID,
-                                certificateString: useStripeSDK.directoryServerCertificate ?? "",
-                                rootCertificateStrings: useStripeSDK.rootCertificateStrings ?? [],
-                                withProtocolVersion: "2.2.0"
-                            )
-                            authRequestParams = transaction?.createAuthenticationRequestParameters()
-                        },
-                        catch: { exception in
-
-                            self.analyticsClient
-                                .log3DS2AuthenticationRequestParamsFailed(
-                                    with: currentAction.apiClient._stored_configuration,
-                                    intentID: currentAction.intentStripeID,
-                                    error: self._error(
-                                        for: .stripe3DS2ErrorCode,
-                                        loggingSafeErrorMessage: exception.description
-                                    )
-                                )
-
-                            currentAction.complete(
-                                with: STPPaymentHandlerActionStatus.failed,
-                                error: self._error(
-                                    for: .stripe3DS2ErrorCode,
-                                    loggingSafeErrorMessage: exception.description
-                                )
-                            )
-                        },
-                        finallyBlock: {
-                        }
-                    )
-
-                    analyticsClient.log3DS2AuthenticateAttempt(
-                        with: currentAction.apiClient._stored_configuration,
-                        intentID: currentAction.intentStripeID
-                    )
-
-                    guard let authParams = authRequestParams, let transaction else {
-                        currentAction.complete(
-                            with: STPPaymentHandlerActionStatus.failed,
-                            error: self._error(
-                                for: .stripe3DS2ErrorCode,
-                                loggingSafeErrorMessage: transaction == nil ? "Missing transaction." : "Missing auth request params."
-                            )
-                        )
-                        return
-                    }
-                    currentAction.threeDS2Transaction = transaction
-                    currentAction.apiClient.authenticate3DS2(
-                        authParams,
-                        sourceIdentifier: useStripeSDK.threeDSSourceID ?? "",
-                        returnURL: currentAction.returnURLString,
-                        maxTimeout: currentAction.threeDSCustomizationSettings
-                            .authenticationTimeout,
-                        publishableKeyOverride: useStripeSDK.publishableKeyOverride
-                    ) { (authenticateResponse, error) in
-                        guard let authenticateResponse else {
-                            let error = error ?? self._error(for: .stripe3DS2ErrorCode, loggingSafeErrorMessage: "Missing authenticate response")
-                            currentAction.complete(with: .failed, error: error as NSError)
-                            return
-                        }
-                        guard error == nil else {
-                            currentAction.complete(with: .failed, error: error! as NSError)
-                            return
-                        }
-                        if let aRes = authenticateResponse.authenticationResponse {
-
-                            if aRes.isChallengeRequired {
-                                let challengeParameters = STDSChallengeParameters(
-                                    authenticationResponse: aRes
-                                )
-
-                                let doChallenge: STPVoidBlock = {
-                                    var presentationError: NSError?
-
-                                    guard self._canPresent(
-                                        with: currentAction.authenticationContext,
-                                        error: &presentationError
-                                    ) else {
-                                        currentAction.complete(
-                                            with: .failed,
-                                            error: presentationError
-                                        )
-                                        return
-                                    }
-                                    STDSSwiftTryCatch.try({
-                                        let presentingViewController = currentAction.authenticationContext.authenticationPresentingViewController()
-                                        let timeout = TimeInterval(currentAction.threeDSCustomizationSettings.authenticationTimeout * 60)
-                                        if let paymentSheet = presentingViewController as? PaymentSheetAuthenticationContext {
-                                            transaction.doChallenge(
-                                                with: challengeParameters,
-                                                challengeStatusReceiver: self,
-                                                timeout: timeout
-                                            ) { threeDSChallengeViewController, completion in
-                                                paymentSheet.present(
-                                                    threeDSChallengeViewController,
-                                                    completion: completion
-                                                )
-                                            }
-                                        } else {
-                                            transaction.doChallenge(
-                                                with: presentingViewController,
-                                                challengeParameters: challengeParameters,
-                                                challengeStatusReceiver: self,
-                                                timeout: timeout
-                                            )
-                                        }
-                                    }, catch: { exception in
-                                        self.currentAction?.complete(
-                                            with: .failed,
-                                            error: self._error(
-                                                for: .stripe3DS2ErrorCode,
-                                                loggingSafeErrorMessage: exception.description
-                                            )
-                                        )
-                                    }, finallyBlock: {}
-                                    )
-                                }
-
-                                if currentAction.authenticationContext.responds(
-                                    to: #selector(
-                                        STPAuthenticationContext.prepare(forPresentation:))
-                                ) {
-                                    currentAction.authenticationContext.prepare?(
-                                        forPresentation: doChallenge
-                                    )
-                                } else {
-                                    doChallenge()
-                                }
-
-                            } else {
-                                // Challenge not required, finish the flow.
-                                transaction.close()
-                                currentAction.threeDS2Transaction = nil
-                                self.analyticsClient.log3DS2FrictionlessFlow(
-                                    with: currentAction.apiClient._stored_configuration,
-                                    intentID: currentAction.intentStripeID
-                                )
-
-                                self._retrieveAndCheckIntentForCurrentAction()
-                            }
-
-                        } else if let fallbackURL = authenticateResponse.fallbackURL {
-                            self._handleRedirect(
-                                to: fallbackURL,
-                                withReturn: URL(string: currentAction.returnURLString ?? ""), useWebAuthSession: false
-                            )
-                        } else {
-                            currentAction.complete(
-                                with: .failed,
-                                error: self._error(
-                                    for: .unexpectedErrorCode,
-                                    loggingSafeErrorMessage: "3DS2 authenticate response missing both response and fallback URL."
-                                )
-                            )
-                        }
-                    }
-
+                    failCurrentActionWithMissingNextActionDetails()
+                    
                 case .threeDS2Redirect:
                     guard let redirectURL = useStripeSDK.redirectURL else {
                         currentAction.complete(with: .failed, error: self._error(for: .unexpectedErrorCode, loggingSafeErrorMessage: "Next action type is threeDS2Redirect but missing redirect URL."))
@@ -1278,7 +1271,7 @@ public class STPPaymentHandler: NSObject {
                     return
                 }
                 // If we are using PaymentSheet, PollingViewController will poll Stripe to determine success and complete the currentAction
-                presentingVC.presentPollingVCForAction(action: currentAction, type: .blik, safariViewController: nil)
+//                presentingVC.presentPollingVCForAction(action: currentAction, type: .blik, safariViewController: nil)
             } else {
                 // The merchant integration should spin and poll their backend or Stripe to determine success
                 currentAction.complete(with: .succeeded, error: nil)
@@ -1295,7 +1288,7 @@ public class STPPaymentHandler: NSObject {
                     return
                 }
                 // If we are using PaymentSheet, PollingViewController will poll Stripe to determine success and complete the currentAction
-                presentingVC.presentPollingVCForAction(action: currentAction, type: .UPI, safariViewController: nil)
+//                presentingVC.presentPollingVCForAction(action: currentAction, type: .UPI, safariViewController: nil)
             } else {
                 // The merchant integration should spin and poll their backend or Stripe to determine success
                 currentAction.complete(with: .succeeded, error: nil)
@@ -1307,11 +1300,11 @@ public class STPPaymentHandler: NSObject {
                 return
             }
 
-            if let mobileAuthURL = authenticationAction.cashAppRedirectToApp?.mobileAuthURL {
-                _handleRedirect(to: mobileAuthURL, fallbackURL: mobileAuthURL, return: returnURL, useWebAuthSession: false)
-            } else {
-                failCurrentActionWithMissingNextActionDetails()
-            }
+//            if let mobileAuthURL = authenticationAction.cashAppRedirectToApp?.mobileAuthURL {
+//                _handleRedirect(to: mobileAuthURL, fallbackURL: mobileAuthURL, return: returnURL, useWebAuthSession: false)
+//            } else {
+//                failCurrentActionWithMissingNextActionDetails()
+//            }
         case .payNowDisplayQrCode:
             guard let returnURL = URL(string: currentAction.returnURLString ?? "") else {
                 assertionFailure(missingReturnURLErrorMessage)
@@ -1331,10 +1324,10 @@ public class STPPaymentHandler: NSObject {
                 currentAction.complete(with: .failed, error: self._error(for: .unexpectedErrorCode, loggingSafeErrorMessage: "Handling payNowDisplayQrCode next action with SetupIntent is not supported"))
                 return
             }
-            _handleRedirect(to: hostedInstructionsURL, fallbackURL: hostedInstructionsURL, return: returnURL, useWebAuthSession: false) { safariViewController in
-                // Present the polling view controller behind the web view so we can start polling right away
-                presentingVC.presentPollingVCForAction(action: currentAction, type: .paynow, safariViewController: safariViewController)
-            }
+//            _handleRedirect(to: hostedInstructionsURL, fallbackURL: hostedInstructionsURL, return: returnURL, useWebAuthSession: false) { safariViewController in
+//                // Present the polling view controller behind the web view so we can start polling right away
+//                presentingVC.presentPollingVCForAction(action: currentAction, type: .paynow, safariViewController: safariViewController)
+//            }
         case .konbiniDisplayDetails:
             if let hostedVoucherURL = authenticationAction.konbiniDisplayDetails?.hostedVoucherURL {
                 self._handleRedirect(to: hostedVoucherURL, withReturn: nil, useWebAuthSession: false)
@@ -1361,10 +1354,10 @@ public class STPPaymentHandler: NSObject {
                 return
             }
 
-            _handleRedirect(to: hostedInstructionsURL, fallbackURL: hostedInstructionsURL, return: returnURL, useWebAuthSession: false) { safariViewController in
-                // Present the polling view controller behind the web view so we can start polling right away
-                presentingVC.presentPollingVCForAction(action: currentAction, type: .promptPay, safariViewController: safariViewController)
-            }
+//            _handleRedirect(to: hostedInstructionsURL, fallbackURL: hostedInstructionsURL, return: returnURL, useWebAuthSession: false) { safariViewController in
+//                // Present the polling view controller behind the web view so we can start polling right away
+//                presentingVC.presentPollingVCForAction(action: currentAction, type: .promptPay, safariViewController: safariViewController)
+//            }
         case .swishHandleRedirect:
             guard let returnURL = URL(string: currentAction.returnURLString ?? "") else {
                 assertionFailure(missingReturnURLErrorMessage)
@@ -1594,17 +1587,17 @@ public class STPPaymentHandler: NSObject {
     }
 
     @objc func _handleWillForegroundNotification() {
-        NotificationCenter.default.removeObserver(
-            self,
-            name: UIApplication.willEnterForegroundNotification,
-            object: nil
-        )
-        STPURLCallbackHandler.shared().unregisterListener(self)
-        _retrieveAndCheckIntentForCurrentAction()
+//        NotificationCenter.default.removeObserver(
+//            self,
+//            name: UIApplication.willEnterForegroundNotification,
+//            object: nil
+//        )
+//        STPURLCallbackHandler.shared().unregisterListener(self)
+//        _retrieveAndCheckIntentForCurrentAction()
     }
 
     @_spi(STP) public func _handleRedirect(to url: URL, withReturn returnURL: URL?, useWebAuthSession: Bool) {
-        _handleRedirect(to: url, fallbackURL: url, return: returnURL, useWebAuthSession: useWebAuthSession)
+//        _handleRedirect(to: url, fallbackURL: url, return: returnURL, useWebAuthSession: useWebAuthSession)
     }
 
     @_spi(STP) public func _handleRedirectToExternalBrowser(to url: URL, withReturn returnURL: URL?) {
@@ -1631,21 +1624,21 @@ public class STPPaymentHandler: NSObject {
         // In the case that it is a stripe owned URL, the URL is expected to redirect our financial partners, at which point Safari can
         // redirect to a native app if the app has been installed.  If Safari is not the default browser, then users not be
         // automatically navigated to the native app.
-        let options: [UIApplication.OpenExternalURLOptionsKey: Any] = [
-            UIApplication.OpenExternalURLOptionsKey.universalLinksOnly: false,
-        ]
-        UIApplication.shared.open(
-            url,
-            options: options,
-            completionHandler: { _ in
-                NotificationCenter.default.addObserver(
-                    self,
-                    selector: #selector(self._handleWillForegroundNotification),
-                    name: UIApplication.willEnterForegroundNotification,
-                    object: nil
-                )
-            }
-        )
+//        let options: [UIApplication.OpenExternalURLOptionsKey: Any] = [
+//            UIApplication.OpenExternalURLOptionsKey.universalLinksOnly: false,
+//        ]
+//        UIApplication.shared.open(
+//            url,
+//            options: options,
+//            completionHandler: { _ in
+//                NotificationCenter.default.addObserver(
+//                    self,
+//                    selector: #selector(self._handleWillForegroundNotification),
+//                    name: UIApplication.willEnterForegroundNotification,
+//                    object: nil
+//                )
+//            }
+//        )
     }
 
     /// Handles redirection to URLs using a native URL or a fallback URL and updates the current action.
@@ -1656,160 +1649,160 @@ public class STPPaymentHandler: NSObject {
     ///     - returnURL: The URL to be registered with the `STPURLCallbackHandler`.
     ///     - useWebAuthSession: Use ASWebAuthenticationSession instead of SFSafariViewController.
     ///     - completion: A completion block invoked after the URL redirection is handled. The SFSafariViewController used is provided as an argument, if it was used for the redirect.
-    func _handleRedirect(to nativeURL: URL?, fallbackURL: URL?, return returnURL: URL?, useWebAuthSession: Bool, completion: ((SFSafariViewController?) -> Void)? = nil) {
-        if let _redirectShim, let url = nativeURL ?? fallbackURL {
-            _redirectShim(url, returnURL, true)
-        }
-
-        // During testing, the completion block is not called since the `UIApplication.open` completion block is never invoked.
-        // As a workaround we invoke the completion in a defer block if the _redirectShim is not nil to simulate presenting a web view
-        defer {
-            if _redirectShim != nil {
-                completion?(nil)
-            }
-        }
-
-        var url = nativeURL
-        guard let currentAction else {
-            stpAssertionFailure("Calling _handleRedirect without a currentAction")
-            let errorAnalytic = ErrorAnalytic(event: .unexpectedPaymentHandlerError, error: InternalError.invalidState, additionalNonPIIParams: ["error_message": "Calling _handleRedirect without a currentAction"])
-            analyticsClient.log(analytic: errorAnalytic, apiClient: apiClient)
-            return
-        }
-        if let returnURL {
-            STPURLCallbackHandler.shared().register(self, for: returnURL)
-        }
-
-        analyticsClient.logURLRedirectNextAction(
-            with: currentAction.apiClient._stored_configuration,
-            intentID: currentAction.intentStripeID,
-            usesWebAuthSession: useWebAuthSession
-        )
-
-        // Open the link in SafariVC
-        let presentSFViewControllerBlock: (() -> Void) = {
-            let context = currentAction.authenticationContext
-
-            let presentingViewController = context.authenticationPresentingViewController()
-
-            let doChallenge: STPVoidBlock = {
-                var presentationError: NSError?
-                guard self._canPresent(with: context, error: &presentationError) else {
-                    currentAction.complete(
-                        with: STPPaymentHandlerActionStatus.failed,
-                        error: presentationError
-                    )
-                    return
-                }
-
-                if let fallbackURL,
-                    ["http", "https"].contains(fallbackURL.scheme)
-                {
-                    if useWebAuthSession {
-                        if self._redirectShim != nil {
-                            // No-op if the redirect shim is active, as we don't want to open the consent dialog. We'll call the completion block automatically.
-                            return
-                        }
-                        // Note that ASWebAuthenticationSession will also close based on the `redirectURL` defined in the app's Info.plist if called within the ASWAS,
-                        // not only via this callbackURLScheme.
-                        let asWebAuthenticationSession = ASWebAuthenticationSession(url: fallbackURL, callbackURLScheme: "stripesdk", completionHandler: { _, _ in
-                            if context.responds(
-                                to: #selector(STPAuthenticationContext.authenticationContextWillDismiss(_:))
-                            ) {
-                                // This isn't great, but UIViewController is non-nil in the protocol. Maybe it's better to still call it, even if the VC isn't useful?
-                                context.authenticationContextWillDismiss?(UIViewController())
-                            }
-                            STPURLCallbackHandler.shared().unregisterListener(self)
-                            self.analyticsClient.logURLRedirectNextActionCompleted(
-                                with: currentAction.apiClient._stored_configuration,
-                                intentID: currentAction.intentStripeID,
-                                usesWebAuthSession: true
-                            )
-                            self._retrieveAndCheckIntentForCurrentAction()
-                            self.asWebAuthenticationSession = nil
-                        })
-                        asWebAuthenticationSession.prefersEphemeralWebBrowserSession = false
-                        asWebAuthenticationSession.presentationContextProvider = currentAction
-                        self.asWebAuthenticationSession = asWebAuthenticationSession
-                        if context.responds(to: #selector(STPAuthenticationContext.prepare(forPresentation:))) {
-                            context.prepare?(forPresentation: {
-                                asWebAuthenticationSession.start()
-                            })
-                        } else {
-                            asWebAuthenticationSession.start()
-                        }
-                    } else {
-                        let safariViewController = SFSafariViewController(url: fallbackURL)
-                        safariViewController.modalPresentationStyle = .overFullScreen
-#if !canImport(CompositorServices)
-                        safariViewController.dismissButtonStyle = .close
-                        safariViewController.delegate = self
-#endif
-                        if context.responds(
-                            to: #selector(STPAuthenticationContext.configureSafariViewController(_:))
-                        ) {
-                            context.configureSafariViewController?(safariViewController)
-                        }
-                        self.safariViewController = safariViewController
-                        presentingViewController.present(safariViewController, animated: true, completion: {
-                            completion?(safariViewController)
-                        })
-                    }
-                } else {
-                    currentAction.complete(
-                        with: STPPaymentHandlerActionStatus.failed,
-                        error: self._error(for: .requiredAppNotAvailable)
-                    )
-                }
-            }
-            if context.responds(to: #selector(STPAuthenticationContext.prepare(forPresentation:))) {
-                context.prepare?(forPresentation: doChallenge)
-            } else {
-                doChallenge()
-            }
-        }
-
-        // Redirect to an app
-        // We don't want universal links to open up Safari, but we do want to allow custom URL schemes
-        var options: [UIApplication.OpenExternalURLOptionsKey: Any] = [:]
-        #if !targetEnvironment(macCatalyst)
-        if let scheme = url?.scheme, scheme == "http" || scheme == "https" {
-            options[UIApplication.OpenExternalURLOptionsKey.universalLinksOnly] = true
-        }
-        #endif
-
-        // If we're simulating app-to-app redirects, we always want to open the URL in Safari instead of an in-app web view.
-        // We'll tell Safari to open all URLs, not just universal links.
-        // If we don't have a nativeURL, we should open the fallbackURL in Safari instead.
-        if simulateAppToAppRedirect {
-            options[UIApplication.OpenExternalURLOptionsKey.universalLinksOnly] = false
-            url = nativeURL ?? fallbackURL
-        }
-
-        // We don't check canOpenURL before opening the URL because that requires users to pre-register the custom URL schemes
-        if let url = url {
-            UIApplication.shared.open(
-                url,
-                options: options,
-                completionHandler: { success in
-                    if !success {
-                        // no app installed, launch safari view controller
-                        presentSFViewControllerBlock()
-                    } else {
-                        completion?(nil)
-                        NotificationCenter.default.addObserver(
-                            self,
-                            selector: #selector(self._handleWillForegroundNotification),
-                            name: UIApplication.willEnterForegroundNotification,
-                            object: nil
-                        )
-                    }
-                }
-            )
-        } else {
-            presentSFViewControllerBlock()
-        }
-    }
+//    func _handleRedirect(to nativeURL: URL?, fallbackURL: URL?, return returnURL: URL?, useWebAuthSession: Bool, completion: ((SFSafariViewController?) -> Void)? = nil) {
+//        if let _redirectShim, let url = nativeURL ?? fallbackURL {
+//            _redirectShim(url, returnURL, true)
+//        }
+//
+//        // During testing, the completion block is not called since the `UIApplication.open` completion block is never invoked.
+//        // As a workaround we invoke the completion in a defer block if the _redirectShim is not nil to simulate presenting a web view
+//        defer {
+//            if _redirectShim != nil {
+//                completion?(nil)
+//            }
+//        }
+//
+//        var url = nativeURL
+//        guard let currentAction else {
+//            stpAssertionFailure("Calling _handleRedirect without a currentAction")
+//            let errorAnalytic = ErrorAnalytic(event: .unexpectedPaymentHandlerError, error: InternalError.invalidState, additionalNonPIIParams: ["error_message": "Calling _handleRedirect without a currentAction"])
+//            analyticsClient.log(analytic: errorAnalytic, apiClient: apiClient)
+//            return
+//        }
+//        if let returnURL {
+//            STPURLCallbackHandler.shared().register(self, for: returnURL)
+//        }
+//
+//        analyticsClient.logURLRedirectNextAction(
+//            with: currentAction.apiClient._stored_configuration,
+//            intentID: currentAction.intentStripeID,
+//            usesWebAuthSession: useWebAuthSession
+//        )
+//
+//        // Open the link in SafariVC
+//        let presentSFViewControllerBlock: (() -> Void) = {
+//            let context = currentAction.authenticationContext
+//
+//            let presentingViewController = context.authenticationPresentingViewController()
+//
+//            let doChallenge: STPVoidBlock = {
+//                var presentationError: NSError?
+//                guard self._canPresent(with: context, error: &presentationError) else {
+//                    currentAction.complete(
+//                        with: STPPaymentHandlerActionStatus.failed,
+//                        error: presentationError
+//                    )
+//                    return
+//                }
+//
+//                if let fallbackURL,
+//                    ["http", "https"].contains(fallbackURL.scheme)
+//                {
+//                    if useWebAuthSession {
+//                        if self._redirectShim != nil {
+//                            // No-op if the redirect shim is active, as we don't want to open the consent dialog. We'll call the completion block automatically.
+//                            return
+//                        }
+//                        // Note that ASWebAuthenticationSession will also close based on the `redirectURL` defined in the app's Info.plist if called within the ASWAS,
+//                        // not only via this callbackURLScheme.
+//                        let asWebAuthenticationSession = ASWebAuthenticationSession(url: fallbackURL, callbackURLScheme: "stripesdk", completionHandler: { _, _ in
+//                            if context.responds(
+//                                to: #selector(STPAuthenticationContext.authenticationContextWillDismiss(_:))
+//                            ) {
+//                                // This isn't great, but UIViewController is non-nil in the protocol. Maybe it's better to still call it, even if the VC isn't useful?
+//                                context.authenticationContextWillDismiss?(UIViewController())
+//                            }
+//                            STPURLCallbackHandler.shared().unregisterListener(self)
+//                            self.analyticsClient.logURLRedirectNextActionCompleted(
+//                                with: currentAction.apiClient._stored_configuration,
+//                                intentID: currentAction.intentStripeID,
+//                                usesWebAuthSession: true
+//                            )
+//                            self._retrieveAndCheckIntentForCurrentAction()
+//                            self.asWebAuthenticationSession = nil
+//                        })
+//                        asWebAuthenticationSession.prefersEphemeralWebBrowserSession = false
+//                        asWebAuthenticationSession.presentationContextProvider = currentAction
+//                        self.asWebAuthenticationSession = asWebAuthenticationSession
+//                        if context.responds(to: #selector(STPAuthenticationContext.prepare(forPresentation:))) {
+//                            context.prepare?(forPresentation: {
+//                                asWebAuthenticationSession.start()
+//                            })
+//                        } else {
+//                            asWebAuthenticationSession.start()
+//                        }
+//                    } else {
+//                        let safariViewController = SFSafariViewController(url: fallbackURL)
+//                        safariViewController.modalPresentationStyle = .overFullScreen
+//#if !canImport(CompositorServices)
+//                        safariViewController.dismissButtonStyle = .close
+//                        safariViewController.delegate = self
+//#endif
+//                        if context.responds(
+//                            to: #selector(STPAuthenticationContext.configureSafariViewController(_:))
+//                        ) {
+//                            context.configureSafariViewController?(safariViewController)
+//                        }
+//                        self.safariViewController = safariViewController
+//                        presentingViewController.present(safariViewController, animated: true, completion: {
+//                            completion?(safariViewController)
+//                        })
+//                    }
+//                } else {
+//                    currentAction.complete(
+//                        with: STPPaymentHandlerActionStatus.failed,
+//                        error: self._error(for: .requiredAppNotAvailable)
+//                    )
+//                }
+//            }
+//            if context.responds(to: #selector(STPAuthenticationContext.prepare(forPresentation:))) {
+//                context.prepare?(forPresentation: doChallenge)
+//            } else {
+//                doChallenge()
+//            }
+//        }
+//
+//        // Redirect to an app
+//        // We don't want universal links to open up Safari, but we do want to allow custom URL schemes
+//        var options: [UIApplication.OpenExternalURLOptionsKey: Any] = [:]
+//        #if !targetEnvironment(macCatalyst)
+//        if let scheme = url?.scheme, scheme == "http" || scheme == "https" {
+//            options[UIApplication.OpenExternalURLOptionsKey.universalLinksOnly] = true
+//        }
+//        #endif
+//
+//        // If we're simulating app-to-app redirects, we always want to open the URL in Safari instead of an in-app web view.
+//        // We'll tell Safari to open all URLs, not just universal links.
+//        // If we don't have a nativeURL, we should open the fallbackURL in Safari instead.
+//        if simulateAppToAppRedirect {
+//            options[UIApplication.OpenExternalURLOptionsKey.universalLinksOnly] = false
+//            url = nativeURL ?? fallbackURL
+//        }
+//
+//        // We don't check canOpenURL before opening the URL because that requires users to pre-register the custom URL schemes
+//        if let url = url {
+//            UIApplication.shared.open(
+//                url,
+//                options: options,
+//                completionHandler: { success in
+//                    if !success {
+//                        // no app installed, launch safari view controller
+//                        presentSFViewControllerBlock()
+//                    } else {
+//                        completion?(nil)
+//                        NotificationCenter.default.addObserver(
+//                            self,
+//                            selector: #selector(self._handleWillForegroundNotification),
+//                            name: UIApplication.willEnterForegroundNotification,
+//                            object: nil
+//                        )
+//                    }
+//                }
+//            )
+//        } else {
+//            presentSFViewControllerBlock()
+//        }
+//    }
 
     /// Checks if authenticationContext.authenticationPresentingViewController can be presented on.
     /// @note Call this method after `prepareAuthenticationContextForPresentation:`
@@ -1828,32 +1821,32 @@ public class STPPaymentHandler: NSObject {
             }
         }
 
-        let presentingViewController =
-            authenticationContext.authenticationPresentingViewController()
-        var canPresent = true
-        var loggingSafeErrorMessage: String?
-
-        // Is it in the window hierarchy?
-        if presentingViewController.viewIfLoaded?.window == nil {
-            canPresent = false
-            loggingSafeErrorMessage =
-                "authenticationPresentingViewController is not in the window hierarchy. You should probably return the top-most view controller instead."
-        }
+//        let presentingViewController =
+//            authenticationContext.authenticationPresentingViewController()
+//        var canPresent = true
+//        var loggingSafeErrorMessage: String?
+//
+//        // Is it in the window hierarchy?
+//        if presentingViewController.viewIfLoaded?.window == nil {
+//            canPresent = false
+//            loggingSafeErrorMessage =
+//                "authenticationPresentingViewController is not in the window hierarchy. You should probably return the top-most view controller instead."
+//        }
 
         // Is it already presenting something?
-        if presentingViewController.presentedViewController != nil {
-            canPresent = false
-            loggingSafeErrorMessage =
-                "authenticationPresentingViewController is already presenting. You should probably dismiss the presented view controller in `prepareAuthenticationContextForPresentation`."
-        }
-
-        if !canPresent {
-            error = _error(
-                for: .requiresAuthenticationContextErrorCode,
-                loggingSafeErrorMessage: loggingSafeErrorMessage
-            )
-        }
-        return canPresent
+//        if presentingViewController.presentedViewController != nil {
+//            canPresent = false
+//            loggingSafeErrorMessage =
+//                "authenticationPresentingViewController is already presenting. You should probably dismiss the presented view controller in `prepareAuthenticationContextForPresentation`."
+//        }
+//
+//        if !canPresent {
+//            error = _error(
+//                for: .requiresAuthenticationContextErrorCode,
+//                loggingSafeErrorMessage: loggingSafeErrorMessage
+//            )
+//        }
+        return false
     }
 
     /// Check if the intent.nextAction is expected state after a successful on-session transaction
@@ -2202,28 +2195,28 @@ struct STPPaymentHandlerError: Error, CustomNSError, AnalyticLoggableError {
 }
 
 #if !canImport(CompositorServices)
-extension STPPaymentHandler: SFSafariViewControllerDelegate {
-    // MARK: - SFSafariViewControllerDelegate
-    /// :nodoc:
-    @objc
-    public func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
-        let context = currentAction?.authenticationContext
-        if context?.responds(
-            to: #selector(STPAuthenticationContext.authenticationContextWillDismiss(_:))
-        ) ?? false {
-            context?.authenticationContextWillDismiss?(controller)
-        }
-        safariViewController = nil
-        STPURLCallbackHandler.shared().unregisterListener(self)
-        _retrieveAndCheckIntentForCurrentAction()
-
-        self.analyticsClient.logURLRedirectNextActionCompleted(
-            with: currentAction?.apiClient._stored_configuration,
-            intentID: currentAction?.intentStripeID,
-            usesWebAuthSession: true
-        )
-    }
-}
+//extension STPPaymentHandler: SFSafariViewControllerDelegate {
+//    // MARK: - SFSafariViewControllerDelegate
+//    /// :nodoc:
+//    @objc
+//    public func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
+//        let context = currentAction?.authenticationContext
+//        if context?.responds(
+//            to: #selector(STPAuthenticationContext.authenticationContextWillDismiss(_:))
+//        ) ?? false {
+//            context?.authenticationContextWillDismiss?(controller)
+//        }
+//        safariViewController = nil
+//        STPURLCallbackHandler.shared().unregisterListener(self)
+//        _retrieveAndCheckIntentForCurrentAction()
+//
+//        self.analyticsClient.logURLRedirectNextActionCompleted(
+//            with: currentAction?.apiClient._stored_configuration,
+//            intentID: currentAction?.intentStripeID,
+//            usesWebAuthSession: true
+//        )
+//    }
+//}
 #endif
 
 /// :nodoc:
@@ -2237,29 +2230,30 @@ extension STPPaymentHandler: SFSafariViewControllerDelegate {
             return false
         }
         // Note: At least my iOS 15 device, willEnterForegroundNotification is triggered before this method when returning from another app, which means this method isn't called because it unregisters from STPURLCallbackHandler.
-        let context = currentAction?.authenticationContext
-        if context?.responds(
-            to: #selector(STPAuthenticationContext.authenticationContextWillDismiss(_:))
-        ) ?? false,
-            let safariViewController = safariViewController
-        {
-            context?.authenticationContextWillDismiss?(safariViewController)
-        }
-
-        NotificationCenter.default.removeObserver(
-            self,
-            name: UIApplication.willEnterForegroundNotification,
-            object: nil
-        )
-        STPURLCallbackHandler.shared().unregisterListener(self)
-        safariViewController?.dismiss(animated: true) {
-            self.safariViewController = nil
-        }
-        _retrieveAndCheckIntentForCurrentAction()
+//        let context = currentAction?.authenticationContext
+//        if context?.responds(
+//            to: #selector(STPAuthenticationContext.authenticationContextWillDismiss(_:))
+//        ) ?? false,
+//            let safariViewController = safariViewController
+//        {
+//            context?.authenticationContextWillDismiss?(safariViewController)
+//        }
+//
+//        NotificationCenter.default.removeObserver(
+//            self,
+//            name: UIApplication.willEnterForegroundNotification,
+//            object: nil
+//        )
+//        STPURLCallbackHandler.shared().unregisterListener(self)
+//        safariViewController?.dismiss(animated: true) {
+//            self.safariViewController = nil
+//        }
+//        _retrieveAndCheckIntentForCurrentAction()
         return true
     }
 }
 
+/*
 extension STPPaymentHandler {
     // MARK: - STPChallengeStatusReceiver
     /// :nodoc:
@@ -2495,10 +2489,12 @@ extension STPPaymentHandler {
         transaction.cancelChallengeFlow()
     }
 }
+ 
+ */
 
 /// Internal authentication context for PaymentSheet magic
 @_spi(STP) public protocol PaymentSheetAuthenticationContext: STPAuthenticationContext {
-    func present(_ authenticationViewController: UIViewController, completion: @escaping () -> Void)
-    func dismiss(_ authenticationViewController: UIViewController, completion: (() -> Void)?)
-    func presentPollingVCForAction(action: STPPaymentHandlerPaymentIntentActionParams, type: STPPaymentMethodType, safariViewController: SFSafariViewController?)
+//    func present(_ authenticationViewController: UIViewController, completion: @escaping () -> Void)
+//    func dismiss(_ authenticationViewController: UIViewController, completion: (() -> Void)?)
+//    func presentPollingVCForAction(action: STPPaymentHandlerPaymentIntentActionParams, type: STPPaymentMethodType, safariViewController: SFSafariViewController?)
 }

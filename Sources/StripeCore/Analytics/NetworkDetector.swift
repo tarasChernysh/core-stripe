@@ -14,6 +14,7 @@ import SystemConfiguration
 /// A class which can detect the current network type of the device
 class NetworkDetector {
 
+#if canImport(UIKit)
     static func getConnectionType() -> String? {
 #if canImport(CoreTelephony)
         guard let reachability = SCNetworkReachabilityCreateWithName(kCFAllocatorDefault, "www.stripe.com") else {
@@ -55,5 +56,10 @@ class NetworkDetector {
         return "Wi-Fi"
 #endif
     }
+    #elseif canImport(AppKit)
+    static func getConnectionType() -> String? {
+        return "Wi-Fi"
+    }
 
+#endif
 }
