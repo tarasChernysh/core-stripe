@@ -29,6 +29,7 @@ let package = Package(
         ),
         .target(
             name: "StripePayments",
+            dependencies: ["StripeCore"],
             resources: [.process("Resources")]),
     ]
 )
