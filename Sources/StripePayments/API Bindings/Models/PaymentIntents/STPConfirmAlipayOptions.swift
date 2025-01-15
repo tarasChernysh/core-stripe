@@ -7,7 +7,7 @@
 //
 
 import Foundation
-@_spi(STP) import StripeCore
+//@_spi(STP) import StripeCore
 
 /// Alipay options to pass to `STPConfirmPaymentMethodOptions``
 public class STPConfirmAlipayOptions: NSObject {
@@ -21,7 +21,7 @@ public class STPConfirmAlipayOptions: NSObject {
     /// The app version.
     /// @note This is automatically populated by the SDK.
     @objc public var appVersionKey: String {
-        return Bundle.stp_applicationVersion() ?? "1.0.0"  // Should only be nil for tests
+         "1.0.0"  // Should only be nil for tests
     }
 
     @objc public var additionalAPIParameters: [AnyHashable: Any] = [:]
