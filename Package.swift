@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "StripeMacOS",
+    name: "StripeCoreAndPayment",
     defaultLocalization: "en",
     platforms: [.macOS(.v13), .iOS(.v16)],
     products: [
